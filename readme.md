@@ -1,0 +1,1 @@
+This repo is more or less of a scratchpad for testing algorithms and crunching data related to microtonal tunings and MOS (Moment of Symmetry) scales. 
