@@ -36,8 +36,8 @@ def getEDOMOSData(maxEDO):
 
     return edomosdata
 
-def mosDataTest():
-    data = getEDOMOSData(12)
+def mosUpToET(et):
+    data = getEDOMOSData(et)
     edos = list(data.keys())
     for edo in edos:
         print("{}-EDO:".format(edo))
@@ -61,7 +61,7 @@ def groupingTest(groupingFunction):
         for p in primes:
             allSizes = data[edo][p][0][1:]
 
-            scaleSize = suggestedScaleSize(allSizes)
+            scaleSize = suggestedScaleSize(allSizes, True)
             grouping = groupingFunction(edo, allSizes, scaleSize)
 
             symmetric = symArray(grouping)
@@ -70,9 +70,32 @@ def groupingTest(groupingFunction):
 
         print()
 
+def megaGroupingTest(groupingFunction):
+    data = getEDOMOSData(56)
+    edos = list(data.keys())
+    nonsymmetric = 0
+
+    for edo in edos:
+        print("{}-EDO:".format(edo))
+        primes = list(data[edo].keys())
+        for p in primes:
+            allSizes = data[edo][p][0][1:]
+            print("\t{}/{}:".format(p, edo))
+            for s in allSizes:
+                if (s > 2):
+                    grouping = groupingFunction(edo, allSizes, s)
+                    symmetric = symArray(grouping)
+                    print("\t\t{}: {}\tsymmetric: {}".format(s, grouping, "YES" if len(symmetric) > 0 else "NO"))
+                    if (len(symmetric) == 0):
+                        nonsymmetric += 1
+
+        print()
+    print("There were {} nonsymmetric groupings.".format(nonsymmetric))
+
 def printMOSGrouping(period, generator, size, groupingFunction=nestedSymmetricGrouping):
     print("{}/{}, {}: {}".format(generator, period, size, getGroupingOfMOS(period, generator, size, groupingFunction)))
 
-#printMOSGrouping(22, 9, 7, bestGrouping)
-
-groupingTest(bestGrouping)
+#printMOSGrouping(15, 8, 7, complimentaryGrouping)
+megaGroupingTest(complimentaryGrouping)
+#numSizesOfMOSinET(31)
+#printMOSOfET(31)

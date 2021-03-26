@@ -188,13 +188,46 @@ def compatible_edos(numNotes, highestDivision):
 
     return edosOut
 
-def edos_mos_scales(edo):
-    cps = coprimes(edo)
-    for p in cps:
-        mosdata = getMOSData(p/edo)
-        print("MOS Data of {}\{}".format(p, edo))
-        d = mosdata[0]
-        n = mosdata[1]
-        for size in range(len(d)):
-            print("{}\{}, ".format(n[size], d[size]), end="")
-        print('\n')
+def printMOSOfET(numberOfTones):
+    cp = coprimes(numberOfTones)
+    for n in cp:
+        data = getMOSData(n/numberOfTones)
+        print("{}/{}:".format(n, numberOfTones))
+        pgStr = ""
+        sizeStr = ""
+        for i in range(len(data[0])):
+            pgStr += "{}/{}, ".format(data[1][i], data[0][i])
+            sizeStr += "{}, ".format(data[0][i])
+
+        print("\tP/G: " + pgStr)
+        print("\tEDOs: " + sizeStr)
+        print("\tSize: {}".format(len(data[0])))
+        print()
+
+def numSizesOfMOSinET(numberOfTones, filterTrivialSizes=True):
+    cp = coprimes(numberOfTones, True)
+    #sizeCount = list(zip(range(1, numberOfTones + 1), [0] * numberOfTones))
+    seedsOfScaleSizes = {size: [] for size in range(1, numberOfTones + 1)}
+
+    for n in cp:
+        data = getMOSData(n/numberOfTones)
+        [sizes, generators] = data
+        seed = "{}/{}".format(n, numberOfTones)
+        for i in range(1, len(sizes)):
+            listOfSeeds = seedsOfScaleSizes[sizes[i]]
+            if (seed not in listOfSeeds):
+                listOfSeeds.append(seed)
+
+    # count the size of each scale size bucket
+    sizeCount = {x: len(seedsOfScaleSizes[x]) for x in seedsOfScaleSizes.keys()}
+
+    # sort by bucket size
+    sortedSizes = sorted(sizeCount.keys(), key=lambda s: sizeCount[s], reverse=True)
+
+    print("Sizes of MOS scales of {}-ET:".format(numberOfTones))
+    for s in sortedSizes:
+        if (not filterTrivialSizes or (filterTrivialSizes and sizeCount[s] > 0 and s not in [1, 2, 3, numberOfTones])):
+            print("{}x {}-note MOS scales".format(sizeCount[s], s))
+            print("\tSeeds: {}\n".format(seedsOfScaleSizes[s]))
+
+

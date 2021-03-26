@@ -250,6 +250,7 @@ def complimentaryGrouping(period, allSizes, scaleSize):
 # compare groupings and return the one with the smallest range
 def bestGrouping(period, allSizes, scaleSize, dbgPrint=False):
     groupings = []
+    #groupings.append(cascadingGrouping(period, allSizes, scaleSize))
     groupings.append(nestedSymmetricGrouping(period, allSizes, scaleSize))
     groupings.append(complimentaryGrouping(period, allSizes, scaleSize))
 
@@ -283,12 +284,12 @@ def getGroupingOfMOS(period, generator, scaleSize, groupingFunction):
     (sizes, gens) = getMOSData(frac)
     return groupingFunction(period, sizes, scaleSize)
 
-def suggestedScaleSize(allSizes):
+def suggestedScaleSize(allSizes, preferLarger=False):
     size = -1
     dif1 = 10000
     for s in allSizes:
         dif2 = abs(7 - s)
-        if (dif2 < dif1):
+        if (dif2 < dif1 or (preferLarger and dif2 <= dif1)):
             size = s
             dif1 = dif2
 
