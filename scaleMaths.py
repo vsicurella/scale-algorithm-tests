@@ -1,4 +1,14 @@
 from math import *
+from primes import *
+
+def clean(num, prec=10):
+    return round(num * 10 ** prec) * (10 ** -prec)
+
+def ratio_to_cents(ratio):
+    return log(ratio)/log(2) * 1200
+
+def cents_to_ratio(cents):
+    return 2 ** (cents / 1200)
 
 def array_sum(array):
     s = 0
@@ -6,7 +16,7 @@ def array_sum(array):
         s += n
     return s
 
-def get_cf(num, maxdepth=20, round0thresh=10e-6):
+def get_cf(num, maxdepth=20, round0thresh=1e-5):
     n = num
     cf = [] # the continued fraction
     for i in range(maxdepth):
@@ -21,10 +31,27 @@ def get_cf(num, maxdepth=20, round0thresh=10e-6):
     return cf
 
 def is_prime(number):
+    if number == LAST_PRIME:
+        return True
 
-    for x in range(2, int(number**0.5)+1):
-        #print("{} % {} = {}".format(number, x, number % x))
-        if (number % x == 0):
+    if number < LAST_PRIME:
+        return number in PRIMES
+
+    sqroot = int(number**0.5)+1
+
+    # slow, suboptimal
+    if sqroot > LAST_PRIME:
+        for i in range(LAST_PRIME, sqroot + 1):
+            if number % i == 0:
+                return False
+        return True
+
+    # fast lookup
+    pindex = 0
+    factor = PRIMES[0]
+    while factor < sqroot:
+        factor = PRIMES[pindex]
+        if number % factor == 0:
             return False;
 
     return True;
@@ -92,7 +119,7 @@ def diophantines(cfIn):
     #cidx.append(it)
     ((p0, p1),(g,p)) = triplet
     triplet = (((g,p),p1),(p1[0]+g,p1[1]+p))
-    
+
     for d in range(1, len(cfIn)):
         for i in range(cfIn[d]):
             dts.append(triplet)
@@ -108,17 +135,22 @@ def diophantines(cfIn):
 
     return (dts, cidx)
 
-#dummy replacement for accidentally deleted function
-def getMOSData(fracIn):
-    cf = get_cf(fracIn)
-    (dts, cidx) = diophantines(cf)
+def getAllConvergents(fracIn, cfMaxDepth=20, cf0Round=1e-5):
+    cf = get_cf(fracIn, cfMaxDepth, cf0Round)
 
     ds = []
     ns = []
 
-    for i in dts:
-        ds.append(i[1][1])
-        ns.append(i[1][0])
+    if len(cf) > 2:
+        (dts, cidx) = diophantines(cf)
+
+        for i in dts:
+            ds.append(i[1][1])
+            ns.append(i[1][0])
+
+    elif len(cf) == 2:
+        ds = [1] + list(range(1, cf[1] + 1))
+        ns = [0] + [1] * cf[1]
 
     return (ds, ns)
 
@@ -144,6 +176,13 @@ def mos_scale(periodNum, genNum, size, doLog=False):
     p = periodNum if not doLog else log(periodNum)
     g = genNum if not doLog else log(genNum)
     #didn't acutally need
+
+    # ratio = g/p;
+    # if (doLog):
+    #     ratio = log(g)/log(p)
+
+    # g_cents = 
+
 
 def compatible_edos(numNotes, highestDivision):
     edoMosSizes = []
@@ -191,7 +230,7 @@ def compatible_edos(numNotes, highestDivision):
 def printMOSOfET(numberOfTones):
     cp = coprimes(numberOfTones)
     for n in cp:
-        data = getMOSData(n/numberOfTones)
+        data = getAllConvergents(n/numberOfTones)
         print("{}/{}:".format(n, numberOfTones))
         pgStr = ""
         sizeStr = ""
@@ -210,7 +249,7 @@ def numSizesOfMOSinET(numberOfTones, filterTrivialSizes=True):
     seedsOfScaleSizes = {size: [] for size in range(1, numberOfTones + 1)}
 
     for n in cp:
-        data = getMOSData(n/numberOfTones)
+        data = getAllConvergents(n/numberOfTones)
         [sizes, generators] = data
         seed = "{}/{}".format(n, numberOfTones)
         for i in range(1, len(sizes)):
@@ -229,5 +268,4 @@ def numSizesOfMOSinET(numberOfTones, filterTrivialSizes=True):
         if (not filterTrivialSizes or (filterTrivialSizes and sizeCount[s] > 0 and s not in [1, 2, 3, numberOfTones])):
             print("{}x {}-note MOS scales".format(sizeCount[s], s))
             print("\tSeeds: {}\n".format(seedsOfScaleSizes[s]))
-
 

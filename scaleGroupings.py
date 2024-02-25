@@ -281,7 +281,7 @@ def bestGrouping(period, allSizes, scaleSize, dbgPrint=False):
 
 def getGroupingOfMOS(period, generator, scaleSize, groupingFunction):
     frac = generator / period
-    (sizes, gens) = getMOSData(frac)
+    (sizes, gens) = getAllConvergents(frac)
     return groupingFunction(period, sizes, scaleSize)
 
 def suggestedScaleSize(allSizes, preferLarger=False):

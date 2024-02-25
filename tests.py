@@ -29,7 +29,7 @@ def getEDOMOSData(maxEDO):
 
         if (len(cps) > 0):
             for p in cps:
-                mosdata = getMOSData(p / d)
+                mosdata = getAllConvergents(p / d)
                 edodata[p] = mosdata
 
             edomosdata[d] = edodata
@@ -50,6 +50,12 @@ def mosUpToET(et):
                 print("{}/{}, ".format(n[size], d[size]), end="")
             print()
         print()
+
+def mosScalesUpToET(et):
+    data = getEDOMOSData(et)
+    edos = list(data.keys())
+    for edo in edos:
+        print("{}-EDO:".format(edo))
 
 def groupingTest(groupingFunction):
     data = getEDOMOSData(53)
@@ -96,6 +102,7 @@ def printMOSGrouping(period, generator, size, groupingFunction=nestedSymmetricGr
     print("{}/{}, {}: {}".format(generator, period, size, getGroupingOfMOS(period, generator, size, groupingFunction)))
 
 #printMOSGrouping(15, 8, 7, complimentaryGrouping)
-megaGroupingTest(complimentaryGrouping)
+#megaGroupingTest(complimentaryGrouping)
 #numSizesOfMOSinET(31)
 #printMOSOfET(31)
+mosScalesUpToET(31)
